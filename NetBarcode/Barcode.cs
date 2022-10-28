@@ -20,6 +20,9 @@ using RectangleF = SixLabors.ImageSharp.RectangleF;
 
 namespace NetBarcode
 {
+    using System.Numerics;
+    using SixLabors.ImageSharp.Drawing;
+
     public enum Type
     {
         Codabar,
@@ -657,15 +660,26 @@ namespace NetBarcode
                 imageContext.BackgroundColor(_backgroundColor);
 
                 //lines are fBarWidth wide so draw the appropriate color line vertically
-                var pen = new Pen(_foregroundColor, iBarWidth / iBarWidthModifier);
+                var penWidth = iBarWidth / iBarWidthModifier;
+                var pen = new Pen(_foregroundColor, penWidth);
 
                 while (pos < _encodedData.Length)
                 {
                     if (_encodedData[pos] == '1')
                     {
-                        imageContext.DrawLines(pen,
-                            new PointF(pos * iBarWidth + shiftAdjustment + halfBarWidth, topLabelAdjustment),
-                            new PointF(pos * iBarWidth + shiftAdjustment + halfBarWidth, _height + topLabelAdjustment)
+                        var drawingOptions = new DrawingOptions
+                        {
+                            GraphicsOptions = new GraphicsOptions
+                            {
+                                Antialias = false, // default (true)
+                            }
+                        };
+
+                        var x = pos * iBarWidth + shiftAdjustment + halfBarWidth;
+                        
+                        imageContext.DrawLines(drawingOptions, pen,
+                            new PointF(x, topLabelAdjustment),
+                            new PointF(x, _height + topLabelAdjustment)
                         );
                     }
 
